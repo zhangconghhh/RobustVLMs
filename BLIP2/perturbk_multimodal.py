@@ -32,7 +32,7 @@ def evaluate(datas):
     print("PSR_ALL:", num_all/(len(datas)))
     print("PSR_ANY:", num_all/(len(datas)))
 
-def attack_multimodal_alignement(image, model,  text_input, device, norm = "l_inf", epsilon= 2.0/255,
+def perturb_multimodal_alignement(image, model,  text_input, device, norm = "l_inf", epsilon= 2.0/255,
                       alpha = 0.01 , attack_iters = 5,  upper_limit=1.0, lower_limit=0.0):
     delta = torch.zeros_like(model.query_tokens).to(device)     
     if norm == "l_inf":
@@ -67,7 +67,7 @@ def attack_multimodal_alignement(image, model,  text_input, device, norm = "l_in
     return delta
 
 def test_image(image, model,tgt_text, device, attack_iters=20, epsilon=1, alpha = 0.01):
-    delta =attack_multimodal_alignement(image, model, tgt_text, device=device, attack_iters=attack_iters, epsilon=epsilon, alpha = alpha)
+    delta =perturb_multimodal_alignement(image, model, tgt_text, device=device, attack_iters=attack_iters, epsilon=epsilon, alpha = alpha)
     org_cap = model.generate({"image": image})
     tgt_cap = model.generate({"image": image,"qurey_noise": delta})
     return  org_cap, tgt_cap
@@ -78,8 +78,8 @@ if __name__ == '__main__':
     device = torch.device("cuda:0") if torch.cuda.is_available() else "cpu"
     model, vis_processors, txt_processors = load_model_and_preprocess(name="blip2_opt", model_type="pretrain_opt2.7b", is_eval=True, device=device)
 
-    test_file = '/media/disk/01drive/01congzhang/git23/LAVIS/coco/annotations/coco_karpathy_test_tgt.json'
-    img_dir = '/media/disk/01drive/01congzhang/dataset/COCO/coco2014/'
+    test_file = 'data/coco_karpathy_test_tgt.json'
+    img_dir = '/media/disk/01drive/dataset/COCO/coco2014/'
 
     with open(test_file, 'r') as fcc_file:
         data1 = json.load(fcc_file)

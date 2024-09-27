@@ -2,14 +2,14 @@ import torch
 from PIL import Image
 from torchvision.utils import save_image
 from lavis.models import load_model_and_preprocess
-from attack_utils import clamp, denormalize, normalize
+from perturb_utils import clamp, denormalize, normalize
 
 
-def attack_visual_alignment(image, model,  text_input, device, norm = "l_inf", epsilon_q=1, epsilon_img=12/255,
+def perturb_visual_alignment(image, model,  text_input, device, norm = "l_inf", epsilon_q=1, epsilon_img=12/255,
                       alpha_q = 0.1 ,alpha_img = 1/255 , attack_iters = 5,  upper_limit=1.0, lower_limit=0.0):
 
     ori_query = model.extract_token({"image":image})
-    delta_q = torch.zeros_like(model.query_tokens).to(device)  
+    delta_q = torch.zeros_like(model.query_tokens).to(device)
     delta_img = torch.zeros_like(image).to(device)
     X = denormalize(image, device)
 
@@ -53,10 +53,10 @@ def attack_visual_alignment(image, model,  text_input, device, norm = "l_inf", e
             # d_q = torch.clamp(d_q + alpha_q * torch.sign(g_q), min=-epsilon_q, max=epsilon_q) # untarget
         delta_q.data[:, :, :] = d_q
         delta_q.grad.zero_()
-        
-        x_adv = normalize(X+ delta_img, device)  
+
+        x_adv = normalize(X+ delta_img, device)
         refine_token = model.extract_token({"image":x_adv})
-        loss_img = lossMSE(refine_token-ori_query, delta_q) 
+        loss_img = lossMSE(refine_token-ori_query, delta_q)
         loss_img.backward(retain_graph=True)
         grad_img = delta_img.grad.detach()
         d_img = delta_img[:, :, :, :]
@@ -66,18 +66,18 @@ def attack_visual_alignment(image, model,  text_input, device, norm = "l_inf", e
         d_img = clamp(d_img, lower_limit - X.data, upper_limit - X.data)
         delta_img.data[:, :, :, :] = d_img
         delta_img.grad.zero_()
-    
+
     return delta_img,delta_q
 
 
 def process_image(image, model, raw_text,img_sz,attack_iters=30, epsilon_q=1.5, epsilon_img=16/255):
-    delta_img, query_nosie = attack_visual_alignment(image, model,  raw_text, device=device, attack_iters=attack_iters, epsilon_q=epsilon_q, epsilon_img=epsilon_img)
+    delta_img, query_nosie = perturb_visual_alignment(image, model,  raw_text, device=device, attack_iters=attack_iters, epsilon_q=epsilon_q, epsilon_img=epsilon_img)
     adv_img =  denormalize(image, device) + delta_img
     return adv_img
 
 
 if __name__ == '__main__':
-    
+
     device = torch.device("cuda:0") if torch.cuda.is_available() else "cpu"
     model, vis_processors, txt_processors = load_model_and_preprocess(name="blip2_opt", model_type="pretrain_opt2.7b", is_eval=True, device=device)
 
