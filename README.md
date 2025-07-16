@@ -38,9 +38,18 @@ This is the official implementation of Enhancing the Robustness of Vision-Langua
 sh scripts/v1_5/finetune_lora.sh
 ```
 
-<!-- ## Cite the paper
+## Cite the paper
 If this work is helpful to you, please cite it as:</p>
-``` -->
-
+```
+@ARTICLE{robustVLMs_zhang,
+  author={Zhang, Cong and Wang, Shuhui and Li, Xiaodan and Zhu, Yao and Qi, Honggang and Huang, Qingming},
+  journal={IEEE Transactions on Information Forensics and Security},
+  title={Enhancing the Robustness of Vision-Language Foundation Models by Alignment Perturbation},
+  year={2025},
+  volume={20},
+  number={},
+  pages={7091-7105},
+  doi={10.1109/TIFS.2025.3586430}}
+```
 ## Acknowledgements
 We appreciate the wonderful base implementation of [BLIP-2](https://github.com/salesforce/LAVIS/tree/main/projects/blip2), [InstructBLIP](https://github.com/salesforce/LAVIS/tree/main/projects/instructblip), and [LLaVA](https://github.com/haotian-liu/LLaVA/tree/main). 
